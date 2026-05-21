@@ -4,9 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
+
+	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/config"
 )
 
 const testVersion = "v1.0.0-test"

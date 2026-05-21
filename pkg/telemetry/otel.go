@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 	"go.opentelemetry.io/contrib/propagators/autoprop"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -19,6 +18,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
+
+	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 )
 
 const (

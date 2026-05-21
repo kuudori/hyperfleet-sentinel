@@ -15,6 +15,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 
 	"github.com/openshift-hyperfleet/hyperfleet-broker/broker"
+
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 )
 

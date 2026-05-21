@@ -6,12 +6,13 @@ import (
 	"testing"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	oteltrace "go.opentelemetry.io/otel/trace"
+
+	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 )
 
 func TestInitTraceProvider_StdoutExporter(t *testing.T) {

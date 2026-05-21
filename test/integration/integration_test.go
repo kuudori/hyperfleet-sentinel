@@ -18,6 +18,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/client"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/config"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/engine"
@@ -25,10 +30,6 @@ import (
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/sentinel"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/telemetry"
-	"github.com/prometheus/client_golang/prometheus"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 )
 
 // TestMain provides centralized setup/teardown for integration tests

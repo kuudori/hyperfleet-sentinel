@@ -5,9 +5,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/config"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Subsystem used to define the metrics

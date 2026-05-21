@@ -11,15 +11,16 @@ import (
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/client"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/config"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/engine"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/metrics"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
-	"github.com/prometheus/client_golang/prometheus"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 )
 
 const (

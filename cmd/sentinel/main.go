@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/telemetry"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
@@ -19,6 +18,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/openshift-hyperfleet/hyperfleet-broker/broker"
+
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/client"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/config"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/engine"
@@ -26,6 +26,7 @@ import (
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/metrics"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/sentinel"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
+	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/telemetry"
 )
 
 var (

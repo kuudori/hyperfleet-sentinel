@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/cel-go/cel"
+
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/client"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 )

@@ -9,7 +9,11 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+
 	"github.com/openshift-hyperfleet/hyperfleet-broker/broker"
+
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/client"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/config"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/engine"
@@ -17,8 +21,6 @@ import (
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/internal/payload"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/telemetry"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 )
 
 // otelMessagingSystem maps broker type identifiers to OTel semantic convention values

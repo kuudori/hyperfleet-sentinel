@@ -8,9 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
+	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
 )
 
 const (

@@ -11,9 +11,10 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v5"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/api/openapi"
 	"github.com/openshift-hyperfleet/hyperfleet-sentinel/pkg/logger"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 // Retry configuration constants
