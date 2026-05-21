@@ -87,9 +87,18 @@ formatters:
   enable:
     - gofmt
     - goimports
+    - gci
   settings:
     gofmt:
       simplify: true
+    # Local addition on top of org standard: repo-specific import grouping
+    gci:
+      custom-order: true
+      sections:
+        - standard
+        - default
+        - prefix(github.com/openshift-hyperfleet)
+        - prefix(github.com/openshift-hyperfleet/hyperfleet-sentinel)
   exclusions:
     generated: lax
     paths:

@@ -3,7 +3,6 @@ include .bingo/Variables.mk
 .DEFAULT_GOAL := help
 
 GO ?= go
-GOFMT ?= gofmt
 
 # Schema variant for OpenAPI generation (core, gcp)
 VARIANT ?= core
@@ -113,18 +112,19 @@ test-coverage: test ## Run tests and show coverage
 ##@ Code Quality
 
 .PHONY: fmt
-fmt: ## Format Go code
-	$(GOFMT) -s -w .
+fmt: ## Format Go code and imports
+	$(GOLANGCI_LINT) fmt ./...
 
 .PHONY: gofmt
 gofmt: fmt ## Alias for fmt
 
 .PHONY: fmt-check
 fmt-check: ## Check if code is formatted
-	@diff=$$($(GOFMT) -s -d .); \
+	@diff=$$($(GOLANGCI_LINT) fmt --diff ./... 2>&1) || { echo "$$diff"; echo "golangci-lint fmt failed"; exit 1; }; \
 	if [ -n "$$diff" ]; then \
-		echo "Code is not formatted. Run 'make fmt' to fix:"; \
-		echo "$$diff"; \
+		echo "$$diff" >&2; \
+		echo ""; \
+		echo "Code is not formatted. Run 'make fmt' to fix."; \
 		exit 1; \
 	fi
 
