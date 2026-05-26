@@ -1,38 +1,16 @@
-# CLAUDE.md
+# HyperFleet Sentinel
 
-## Project Identity
+Kubernetes resource watcher — polls HyperFleet API for cluster/nodepool updates, makes orchestration decisions via CEL-based decision logic, publishes CloudEvents to message brokers. Stateless, horizontally scalable via label-based sharding, delegates all state persistence to API.
 
-HyperFleet Sentinel is a **Kubernetes resource watcher** that polls the HyperFleet API for cluster/nodepool updates, makes orchestration decisions via CEL-based decision logic, and publishes CloudEvents to message brokers. Stateless, horizontally scalable via label-based sharding, delegates all state persistence to the API.
+Go 1.25 · Broker abstraction (RabbitMQ, GCP Pub/Sub, Stub) · Helm chart in `charts/`
 
-- **Language**: Go 1.25 (see `go.mod`)
-- **Messaging**: Broker abstraction (RabbitMQ, GCP Pub/Sub, Stub)
-- **API Client**: Generated from [hyperfleet-api-spec](https://github.com/openshift-hyperfleet/hyperfleet-api-spec) — see [openapi/README.md](openapi/README.md)
-- **Deployment**: Helm chart in `charts/`
-
-Sentinel is one component in the HyperFleet control plane:
-- **API** — persists cluster/nodepool state (source of truth)
-- **Sentinel** — watches API, decides when resources need reconciliation, publishes events
-- **Adapters** — consume events, execute provisioning/deprovisioning, report back to API
-- **Broker** (RabbitMQ or Pub/Sub) — decouples Sentinel from adapters
-
-## Critical First Steps
-
-**Generated OpenAPI client is NOT committed to git.** Before any build, test, or development task:
-
-```bash
-make generate    # Extracts OpenAPI spec from hyperfleet-api-spec module and generates Go client
-```
-
-Setup sequence for a fresh clone:
-1. `make generate` — generate OpenAPI client in `pkg/api/openapi/`
-2. `make download` — fetch Go dependencies
-3. `make build` — build `bin/sentinel` binary
-4. `make test` — verify unit tests pass
+**Generated OpenAPI client is NOT committed to git.** Run `make generate` before any build, test, or development task.
 
 ## Verification
 
 | Command | What it does |
 |---|---|
+| `make generate` | Extract OpenAPI spec from hyperfleet-api-spec module, generate Go client |
 | `make verify` | go vet + format check (fast) |
 | `make lint` | golangci-lint (comprehensive) |
 | `make test` | all tests (`./...`), writes `coverage.out` profile |
@@ -44,14 +22,18 @@ Setup sequence for a fresh clone:
 
 Quick feedback: `make verify && make test-unit`. Full pre-push: `make test-all`.
 
-**PR pre-flight order:**
-1. `make generate`
-2. `make fmt`
-3. `make lint`
-4. `make test-unit`
-5. `make test-integration` — if broker/API changes
-6. `make test-helm` — if chart changes
-7. Update CHANGELOG.md if the change is user-visible
+Setup sequence for a fresh clone:
+1. `make generate` — generate OpenAPI client in `pkg/api/openapi/`
+2. `make download` — fetch Go dependencies
+3. `make install-hooks` — install pre-commit hooks
+4. `make build` — build `bin/sentinel` binary
+5. `make test` — verify unit tests pass
+
+## CLI
+
+Subcommands: `sentinel serve`, `sentinel config-dump`, `sentinel version`. Config path via `--config`. All flags have env var equivalents (`HYPERFLEET_*` prefix) — run `sentinel serve --help`.
+
+Config precedence (highest wins): CLI flags > env vars > YAML file > defaults. Broker credentials handled separately via `broker.yaml` (or `BROKER_CONFIG_FILE` env var).
 
 ## Source of Truth
 
@@ -72,7 +54,7 @@ Quick feedback: `make verify && make test-unit`. Full pre-push: `make test-all`.
 
 ## Architecture Context
 
-Sentinel's job: **decide when**, not **execute how**. It can be killed and restarted at any time without data loss — this is what makes label-based sharding safe. The `message_decision` config uses CEL expressions to decide when to publish — see `DefaultMessageDecision()` in `internal/config/config.go` for default expressions.
+Sentinel's job: **decide when**, not **execute how**. Can be killed and restarted at any time without data loss — this is what makes label-based sharding safe. `message_decision` config uses CEL expressions to decide when to publish — see `DefaultMessageDecision()` in `internal/config/config.go`.
 
 ### Key Internal Patterns
 - **Config validation fails fast** — `Validate()` returns error at startup, `LoadConfig()` propagates to main which exits non-zero
@@ -81,79 +63,30 @@ Sentinel's job: **decide when**, not **execute how**. It can be killed and resta
 
 ## Code Conventions
 
-### Commit Messages
-Format: `HYPERFLEET-### - type: description`
-
-Example:
-```
-HYPERFLEET-427 - feat: add standard metrics labels
-
-Adds resource_type and resource_selector labels to all
-Prometheus metrics for consistent querying.
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-Co-Authored-By trailer required on all Claude-assisted commits.
-
-### Configuration
-- Config struct in `internal/config/config.go` — YAML struct tags, validation via `Validate()`
-- All durations use `time.Duration` with YAML `duration` format (e.g., `5s`, `30m`)
-- Config precedence (highest wins): CLI flags > env vars (`HYPERFLEET_*`) > YAML file > defaults
-- Broker credentials handled separately via `broker.yaml` (or `BROKER_CONFIG_FILE` env var)
-
-### CLI Commands
-- `sentinel serve --config config.yaml` — run the service
-- `sentinel config-dump --config config.yaml` — print merged config (debug precedence issues)
-- `sentinel version` — print version, commit, build date
-- Run `sentinel serve --help` for full flag list
-
 ### Error Handling
 - Log at boundaries (main service loop), not deep in call stack
 
 ### Logging
-- Custom structured logger in `pkg/logger/` — stdlib only, no external deps
-- Interface: `logger.HyperFleetLogger` with `Info()`, `Error()`, `Warn()`, `Debug()`, `V(level)` (verbosity), `Extra()`
-- Create via `logger.NewHyperFleetLogger()` — uses global config
-- Chaining: `logger.Extra("key", val).Extra("key2", val2).Info("msg")`
 - **IMPORTANT: always use `pkg/logger`, never `log/slog` directly**
-
-### CloudEvents Payloads
-`message_data` config uses CEL expressions, not static values:
-```yaml
-message_data:
-  id: resource.id
-  kind: resource.kind
-  href: resource.href
-```
-CEL context:
-- `resource` — cluster/nodepool object from API (id, kind, href, generation, status, labels, etc.)
-- `reason` — decision reason string from engine (e.g., `"message decision matched"`, `"message decision result is false"`)
-- `condition("Type")` — custom function to look up resource status condition by type name
-- `now` — current timestamp
-- `timestamp()`, `duration()` — standard CEL time functions
+- Interface: `logger.HyperFleetLogger` with `Info()`, `Error()`, `Warn()`, `Debug()`, `V(level)`, `Extra()`
+- Chaining: `logger.Extra("key", val).Extra("key2", val2).Info("msg")`
 
 ### Testing
-- Table-driven tests with plain `if` assertions — no testify
-- Mocking via simple interface implementations (e.g., MockPublisher), no gomock
+- Table-driven tests with plain `if` assertions — no testify, no gomock
 - Unit tests live alongside code: `foo_test.go` next to `foo.go`
 - Integration tests in `test/integration/` with `//go:build integration` tag
 - Prometheus metrics verified with `prometheus/testutil`
-- Run single test: `go test -run TestDecisionEngine ./internal/engine/...`
 
-## Git Workflow
+## Boundaries
 
-- Branch from `main`, PR back to `main`
-- Branch naming: `HYPERFLEET-###-short-description`
-- Pre-commit hooks: run `make install-hooks` to install — enforces commit message format (`hyperfleet-commitlint`), Go formatting, linting, and vet
+### DON'T
 
-## Project Boundaries
-
-**DO NOT**:
 - Add business logic to Sentinel — orchestration decisions only, execution belongs in adapters
 - Store state in Sentinel — it is stateless, API is source of truth
 - Hardcode the resource polling interval — always use `poll_interval` from config for the main sentinel loop; adding a second resource polling loop bypasses the single-ticker backpressure model
 
-**DO**:
+### DO
+
 - Update `hyperfleet-api-spec` version in `go.mod` and run `make generate` when API spec changes
 - New exported functions require unit tests; new broker/API interactions require integration tests
 - Add metrics when adding observable behavior — see [docs/metrics.md](docs/metrics.md) for conventions
