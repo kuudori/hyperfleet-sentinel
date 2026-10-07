@@ -149,6 +149,13 @@ verify: fmt-check vet ## Run all verification checks
 .PHONY: lint-check
 lint-check: fmt-check vet ## Run static code analysis (alias for verify, follows architecture naming)
 
+HYPERFLEET_HOOKS ?= hyperfleet-hooks
+
+.PHONY: verify-tekton-bundles
+verify-tekton-bundles: ## Verify pinned Konflux task bundle digests in .tekton/ (needs hyperfleet-hooks v0.3.0+)
+	@command -v $(HYPERFLEET_HOOKS) >/dev/null 2>&1 || { echo "hyperfleet-hooks not found. Install it with 'go install github.com/openshift-hyperfleet/hyperfleet-hooks/cmd/hyperfleet-hooks@v0.3.0' or set HYPERFLEET_HOOKS=/path/to/hyperfleet-hooks"; exit 1; }
+	$(HYPERFLEET_HOOKS) verify-tekton-bundles --directory .tekton
+
 ##@ Dependencies
 
 .PHONY: tidy
