@@ -1,10 +1,8 @@
 .DEFAULT_GOAL := help
 
-# CGO_ENABLED=0 is not FIPS compliant. large commercial vendors and FedRAMP require FIPS compliant crypto
-# Use ?= so callers can override on the command line, e.g. CGO_ENABLED=0 make build for a non-FIPS static binary
+# FIPS mode is turned on only in the container image build. See the Dockerfile.
 CGO_ENABLED ?= 1
-GOEXPERIMENT ?= boringcrypto
-GOFIPS140 ?= off
+export CGO_ENABLED
 
 GO ?= go
 GOFMT ?= gofmt
@@ -58,11 +56,11 @@ help: ## Display this help
 .PHONY: build
 build: ## Build the sentinel binary
 	@mkdir -p $(BIN_DIR)
-	CGO_ENABLED=$(CGO_ENABLED) GOEXPERIMENT=$(GOEXPERIMENT) GOFIPS140=$(GOFIPS140) $(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BINARY_NAME) ./cmd/sentinel
+	$(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BINARY_NAME) ./cmd/sentinel
 
 .PHONY: install
 install: ## Build and install binary to GOPATH/bin
-	CGO_ENABLED=$(CGO_ENABLED) GOEXPERIMENT=$(GOEXPERIMENT) GOFIPS140=$(GOFIPS140) $(GO) install $(GOFLAGS) -ldflags "$(LDFLAGS)" ./cmd/sentinel
+	$(GO) install $(GOFLAGS) -ldflags "$(LDFLAGS)" ./cmd/sentinel
 
 .PHONY: install-hooks
 install-hooks: ## Install pre-commit hooks
